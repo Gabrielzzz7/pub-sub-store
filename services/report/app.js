@@ -19,12 +19,23 @@ async function updateReport(products) {
 
 async function printReport() {
     for (const [key, value] of Object.entries(report)) {
-        console.log(`${key} = ${value} vendas`);
-      }
+        console.log(`${key} = ${value} vendas`)
+    }
+}
+
+async function processMessage(msg) {
+    try {
+        const data = JSON.parse(msg.content)
+        await updateReport(data.products || [])
+        await printReport()
+    } catch (err) {
+        console.error('Erro ao processar mensagem:', err)
+    }
 }
 
 async function consume() {
-    //TODO: Constuir a comunicação com a fila 
+    console.log(`INSCRITO COM SUCESSO NA FILA: report`)
+    await (await RabbitMQService.getInstance()).consume('report', processMessage)
 } 
 
 consume()
